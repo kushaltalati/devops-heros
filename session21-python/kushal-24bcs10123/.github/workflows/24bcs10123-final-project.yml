@@ -152,24 +152,18 @@ jobs:
     steps:
       - uses: docker/login-action@v3
         with: { registry: ghcr.io, username: "${{ github.actor }}", password: "${{ secrets.GITHUB_TOKEN }}" }
+      # trivy runs from its own container image (the marketplace action's binary download kept failing);
+      # the docker login above leaves credentials in ~/.docker/config.json, which is mounted read-only.
       - name: trivy - full report (never fails)
-        uses: aquasecurity/trivy-action@v0.33.1
-        with:
-          image-ref: ${{ env.IMAGE_PREFIX }}-${{ matrix.image }}:${{ needs.build-and-push.outputs.tag }}
-          format: table
-          exit-code: "0"
-          ignore-unfixed: true
+        run: |
+          docker run --rm -v "$HOME/.docker/config.json:/root/.docker/config.json:ro" \
+            aquasec/trivy:0.65.0 image --scanners vuln --ignore-unfixed --exit-code 0 \
+            ${{ env.IMAGE_PREFIX }}-${{ matrix.image }}:${{ needs.build-and-push.outputs.tag }}
       - name: trivy - security gate (HIGH/CRITICAL with a fix available => fail)
-        uses: aquasecurity/trivy-action@v0.33.1
-        with:
-          image-ref: ${{ env.IMAGE_PREFIX }}-${{ matrix.image }}:${{ needs.build-and-push.outputs.tag }}
-          format: table
-          exit-code: "1"
-          ignore-unfixed: true
-          severity: HIGH,CRITICAL
-        env:
-          TRIVY_SKIP_DB_UPDATE: "true"
-          TRIVY_SKIP_JAVA_DB_UPDATE: "true"
+        run: |
+          docker run --rm -v "$HOME/.docker/config.json:/root/.docker/config.json:ro" \
+            aquasec/trivy:0.65.0 image --scanners vuln --ignore-unfixed --severity HIGH,CRITICAL --exit-code 1 \
+            ${{ env.IMAGE_PREFIX }}-${{ matrix.image }}:${{ needs.build-and-push.outputs.tag }}
 
   # ------------------------------------------------------------------ 5. deploy (GitOps)
   deploy:

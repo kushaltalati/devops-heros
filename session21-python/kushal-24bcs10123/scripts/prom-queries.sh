@@ -5,13 +5,17 @@ set -uo pipefail
 PROM="${PROM:-http://localhost:21090}"
 q() {
   printf '\n# %s\n$ %s\n' "$1" "$2"
-  curl -s --get "$PROM/api/v1/query" --data-urlencode "query=$2" \
-    | python3 -c 'import json,sys
-d=json.load(sys.stdin)
+  curl -s --get "$PROM/api/v1/query" --data-urlencode "query=$2" | python3 -c '
+import json, sys
+hide = ("__name__", "instance", "endpoint", "service", "container", "namespace", "job")
+d = json.load(sys.stdin)
 for r in d["data"]["result"]:
-    m=r["metric"]; lbl=",".join(f"{k}={v}" for k,v in sorted(m.items()) if k not in ("__name__","instance","endpoint","service","container","namespace","job"))
-    print(f"  {lbl or m.get(\"__name__\",\"\")} => {r[\"value\"][1]}")
-if not d["data"]["result"]: print("  (no data)")'
+    m = r["metric"]
+    lbl = ",".join("%s=%s" % (k, v) for k, v in sorted(m.items()) if k not in hide)
+    print("  %s => %s" % (lbl or m.get("__name__", ""), r["value"][1]))
+if not d["data"]["result"]:
+    print("  (no data)")
+'
 }
 q "scrape target health"            'up{job="studytrack-backend"}'
 q "requests per second by handler"  'sum by (handler) (rate(http_requests_total{job="studytrack-backend"}[1m]))'

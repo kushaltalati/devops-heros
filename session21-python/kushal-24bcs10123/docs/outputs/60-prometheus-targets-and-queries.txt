@@ -1,0 +1,89 @@
+$ kubectl -n studytrack get servicemonitor studytrack-backend -o yaml | grep -A8 "^spec"
+spec:
+  endpoints:
+  - interval: 15s
+    path: /metrics
+    port: http
+  namespaceSelector:
+    matchNames:
+    - studytrack
+  selector:
+
+$ kubectl -n monitoring port-forward svc/kube-prometheus-stack-prometheus 21090:9090 &
+$ curl -s localhost:21090/api/v1/targets | python3 ... | grep studytrack   # Prometheus Targets page, filtered
+  File "<string>", line 3
+    if "studytrack" in t["labels"].get("job",""): print(f"  job={t[\"labels\"][\"job\"]} pod={t[\"labels\"].get(\"pod\")} url={t[\"scrapeUrl\"]} health={t[\"health\"]} lastScrape={t[\"lastScrape\"][:19]}")
+                                                                    ^
+SyntaxError: unexpected character after line continuation character
+
+$ scripts/prom-queries.sh
+
+# scrape target health
+$ up{job="studytrack-backend"}
+  File "<string>", line 5
+    print(f"  {lbl or m.get(\"__name__\",\"\")} => {r[\"value\"][1]}")
+                             ^
+SyntaxError: unexpected character after line continuation character
+
+# requests per second by handler
+$ sum by (handler) (rate(http_requests_total{job="studytrack-backend"}[1m]))
+  File "<string>", line 5
+    print(f"  {lbl or m.get(\"__name__\",\"\")} => {r[\"value\"][1]}")
+                             ^
+SyntaxError: unexpected character after line continuation character
+
+# requests per second by status
+$ sum by (status) (rate(http_requests_total{job="studytrack-backend"}[1m]))
+  File "<string>", line 5
+    print(f"  {lbl or m.get(\"__name__\",\"\")} => {r[\"value\"][1]}")
+                             ^
+SyntaxError: unexpected character after line continuation character
+
+# p95 latency (s)
+$ histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="studytrack-backend"}[5m])) by (le))
+  File "<string>", line 5
+    print(f"  {lbl or m.get(\"__name__\",\"\")} => {r[\"value\"][1]}")
+                             ^
+SyntaxError: unexpected character after line continuation character
+
+# entries created, by subject
+$ sum by (subject) (studytrack_entries_created_total)
+  File "<string>", line 5
+    print(f"  {lbl or m.get(\"__name__\",\"\")} => {r[\"value\"][1]}")
+                             ^
+SyntaxError: unexpected character after line continuation character
+
+# minutes logged
+$ sum(studytrack_minutes_logged_total)
+  File "<string>", line 5
+    print(f"  {lbl or m.get(\"__name__\",\"\")} => {r[\"value\"][1]}")
+                             ^
+SyntaxError: unexpected character after line continuation character
+
+# backend cpu (cores) per pod
+$ sum by (pod) (rate(container_cpu_usage_seconds_total{namespace="studytrack",container="backend"}[2m]))
+  File "<string>", line 5
+    print(f"  {lbl or m.get(\"__name__\",\"\")} => {r[\"value\"][1]}")
+                             ^
+SyntaxError: unexpected character after line continuation character
+
+# backend memory per pod (bytes)
+$ sum by (pod) (container_memory_working_set_bytes{namespace="studytrack",container="backend"})
+  File "<string>", line 5
+    print(f"  {lbl or m.get(\"__name__\",\"\")} => {r[\"value\"][1]}")
+                             ^
+SyntaxError: unexpected character after line continuation character
+
+# hpa current replicas
+$ kube_horizontalpodautoscaler_status_current_replicas{namespace="studytrack"}
+  File "<string>", line 5
+    print(f"  {lbl or m.get(\"__name__\",\"\")} => {r[\"value\"][1]}")
+                             ^
+SyntaxError: unexpected character after line continuation character
+
+$ curl -s localhost:21090/api/v1/rules | ... | grep StudyTrack   # the PrometheusRule from monitoring/prometheusrule.yaml
+prometheusrule.monitoring.coreos.com/studytrack-alerts created
+  File "<string>", line 4
+    if r["name"].startswith("StudyTrack"): print(f"  {r[\"name\"]:28s} state={r.get(\"state\")} health={r[\"health\"]}")
+                                                         ^
+SyntaxError: unexpected character after line continuation character
