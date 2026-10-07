@@ -82,3 +82,25 @@ studytrack-postgres-596bb76c48-86cnk   1/1     Running   0             86s
 
 $ kubectl -n studytrack get deploy studytrack-backend -o jsonpath='{.spec.template.spec.containers[0].image}{"\n"}'
 ghcr.io/kushaltalati/studytrack-backend:latest
+
+############ self-heal: a manual change to the cluster is reverted to what git says
+
+$ kubectl -n studytrack get deploy studytrack-frontend -o jsonpath='replicas in git/cluster: {.spec.replicas}{"\n"}'
+replicas in git/cluster: 2
+
+$ kubectl -n studytrack scale deploy studytrack-frontend --replicas=5     # drift introduced by hand
+deployment.apps/studytrack-frontend scaled
+
+$ kubectl -n studytrack get deploy studytrack-frontend -o jsonpath='{.spec.replicas}{"\n"}'
+5
+(waited 140s)
+
+$ kubectl -n studytrack get deploy studytrack-frontend -o jsonpath='{.spec.replicas}{"\n"}'   # back to 2 without me touching it
+2
+
+$ kubectl -n argocd get application studytrack -o jsonpath='{.status.operationState.phase} {.status.operationState.message}{"\n"}'
+Succeeded successfully synced (all tasks run)
+
+$ kubectl -n argocd get application studytrack -o jsonpath='{range .status.history[*]}{.id} {.deployedAt} {.revision}{"\n"}{end}'
+0 2026-10-07T18:15:49Z 676c5cd3623302bac802a8f5a9689698510cdf25
+1 2026-10-07T18:23:41Z 58f742e17b9489cab25f45c8dcd7ebf8b7ab206d
