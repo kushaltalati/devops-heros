@@ -145,15 +145,26 @@ jobs:
           echo "container runs as:"; docker exec uc id
           docker logs uc | tail -5
           docker rm -f uc
-      - name: validate kubernetes manifests (the real cluster is my laptop kind cluster)
+      - name: create a kind cluster on the runner (stand-in for the real cluster, which is my laptop)
+        uses: helm/kind-action@v1
+        with: { cluster_name: ci }
+      - name: deploy the pushed image to kubernetes
         run: |
+          kind load docker-image "$IMAGE:${{ needs.docker.outputs.tag }}" --name ci
           sed -i "s|:latest|:${{ needs.docker.outputs.tag }}|" k8s/deployment.yaml
-          kubectl apply --dry-run=client --validate=false -o yaml -f k8s/ | grep -E 'kind:|image:|name: unit-converter'
+          kubectl create namespace unit-converter
+          kubectl -n unit-converter apply -f k8s/
+          kubectl -n unit-converter rollout status deploy/unit-converter --timeout=120s
+          kubectl -n unit-converter get pods -o wide
+          kubectl -n unit-converter port-forward svc/unit-converter 8080:80 >/dev/null 2>&1 &
+          sleep 3
+          curl -fs localhost:8080/health; echo
+          curl -fs "localhost:8080/convert/weight?value=1&from_unit=kg&to_unit=lb"; echo
       - name: deployment summary
         run: |
           {
             echo "## unit-converter deployed"
             echo "- image: \`$IMAGE:${{ needs.docker.outputs.tag }}\`"
             echo "- run: #${{ github.run_number }} on \`${{ github.ref_name }}\`"
-            echo "- next: \`kubectl apply -f k8s/\` on the kind cluster (done locally, see README)"
+            echo "- deployed to a kind cluster on the runner; the same manifests are applied on my laptop cluster (README)"
           } >> "$GITHUB_STEP_SUMMARY"
