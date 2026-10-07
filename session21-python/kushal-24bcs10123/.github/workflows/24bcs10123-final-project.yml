@@ -127,7 +127,7 @@ jobs:
             ${{ env.IMAGE_PREFIX }}-backend:latest
           cache-from: type=gha,scope=backend
           cache-to: type=gha,scope=backend,mode=max
-      - name: Build + push frontend (multi-stage: node build -> nginx)
+      - name: "Build + push frontend (multi-stage: node build -> nginx)"
         uses: docker/build-push-action@v6
         with:
           context: ${{ env.PROJECT_DIR }}/frontend
