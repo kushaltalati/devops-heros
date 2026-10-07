@@ -1,0 +1,7 @@
+# trivy configuration shared by the fs, config and image scans
+severity:
+  - CRITICAL
+  - HIGH
+exit-code: 1
+ignore-unfixed: true    # a vulnerability with no fix available cannot block the pipeline
+timeout: 10m
