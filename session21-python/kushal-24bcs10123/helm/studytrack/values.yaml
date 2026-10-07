@@ -6,7 +6,7 @@ image:
   backend: studytrack-backend
   frontend: studytrack-frontend
   # the CI pipeline rewrites this to the git SHA of the build it just pushed
-  tag: latest
+  tag: sha-ada2a45
   pullPolicy: IfNotPresent
   # GHCR packages are private by default; this Secret (type kubernetes.io/dockerconfigjson) is created
   # out of band with `kubectl create secret docker-registry`, never committed. Empty = no pull secret.
