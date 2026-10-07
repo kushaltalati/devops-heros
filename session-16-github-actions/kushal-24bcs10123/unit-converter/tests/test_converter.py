@@ -8,7 +8,7 @@ def test_km_to_m():
 
 
 def test_feet_to_inches():
-    assert convert("length", 1, "ft", "in") == pytest.approx(10)  # wrong on purpose: 1 ft is 12 in
+    assert convert("length", 1, "ft", "in") == pytest.approx(12)
 
 
 def test_kg_to_lb():
