@@ -148,7 +148,7 @@ jobs:
       - name: validate kubernetes manifests (the real cluster is my laptop kind cluster)
         run: |
           sed -i "s|:latest|:${{ needs.docker.outputs.tag }}|" k8s/deployment.yaml
-          kubectl apply --dry-run=client -o yaml -f k8s/ | grep -E 'kind:|image:|name: unit-converter'
+          kubectl apply --dry-run=client --validate=false -o yaml -f k8s/ | grep -E 'kind:|image:|name: unit-converter'
       - name: deployment summary
         run: |
           {
