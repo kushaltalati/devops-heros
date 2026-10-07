@@ -8,7 +8,7 @@ COPY src ./src
 RUN npm run build
 
 # ---- stage 2: serve the static files with nginx (non-root) -----------------
-FROM nginxinc/nginx-unprivileged:1.27-alpine
+FROM nginxinc/nginx-unprivileged:stable-alpine
 ENV BACKEND_URL=http://backend:8000
 # the official image runs envsubst on /etc/nginx/templates/*.template at start-up
 COPY nginx.conf.template /etc/nginx/templates/default.conf.template

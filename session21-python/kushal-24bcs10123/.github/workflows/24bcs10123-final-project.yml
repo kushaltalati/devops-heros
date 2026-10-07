@@ -114,6 +114,7 @@ jobs:
       - uses: actions/checkout@v4
       - id: meta
         run: echo "tag=sha-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-qemu-action@v3      # my cluster is arm64 (Apple Silicon kind), the runner is amd64
       - uses: docker/setup-buildx-action@v3
       - uses: docker/login-action@v3
         with: { registry: ghcr.io, username: "${{ github.actor }}", password: "${{ secrets.GITHUB_TOKEN }}" }
@@ -121,6 +122,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ${{ env.PROJECT_DIR }}/backend
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: |
             ${{ env.IMAGE_PREFIX }}-backend:${{ steps.meta.outputs.tag }}
@@ -131,6 +133,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ${{ env.PROJECT_DIR }}/frontend
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: |
             ${{ env.IMAGE_PREFIX }}-frontend:${{ steps.meta.outputs.tag }}
@@ -150,14 +153,14 @@ jobs:
       - uses: docker/login-action@v3
         with: { registry: ghcr.io, username: "${{ github.actor }}", password: "${{ secrets.GITHUB_TOKEN }}" }
       - name: trivy - full report (never fails)
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@0.33.1
         with:
           image-ref: ${{ env.IMAGE_PREFIX }}-${{ matrix.image }}:${{ needs.build-and-push.outputs.tag }}
           format: table
           exit-code: "0"
           ignore-unfixed: true
       - name: trivy - security gate (HIGH/CRITICAL with a fix available => fail)
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@0.33.1
         with:
           image-ref: ${{ env.IMAGE_PREFIX }}-${{ matrix.image }}:${{ needs.build-and-push.outputs.tag }}
           format: table

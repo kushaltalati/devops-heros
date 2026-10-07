@@ -10,6 +10,7 @@ spec:
   template:
     metadata: {labels: {app: broken-config}}
     spec:
+      imagePullSecrets: [{name: ghcr-pull}]
       containers:
         - name: backend
           image: ghcr.io/kushaltalati/studytrack-backend:latest

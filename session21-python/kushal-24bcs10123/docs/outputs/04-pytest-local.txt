@@ -1,0 +1,16 @@
+tests/test_api.py::test_list_entries_empty PASSED                        [ 36%]
+tests/test_api.py::test_create_entry PASSED                              [ 45%]
+tests/test_api.py::test_create_entry_validation PASSED                   [ 54%]
+tests/test_api.py::test_get_entry_and_404 PASSED                         [ 63%]
+tests/test_api.py::test_update_entry PASSED                              [ 72%]
+tests/test_api.py::test_delete_entry PASSED                              [ 81%]
+tests/test_api.py::test_filter_by_subject_and_status PASSED              [ 90%]
+tests/test_api.py::test_summary PASSED                                   [100%]
+
+=============================== warnings summary ===============================
+.venv/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /Users/kushalscaler/devops-heros-s21/session21-python/kushal-24bcs10123/backend/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 11 passed, 1 warning in 0.37s =========================

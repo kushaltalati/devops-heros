@@ -8,4 +8,5 @@ spec:
   template:
     metadata: {labels: {app: broken-image}}
     spec:
+      imagePullSecrets: [{name: ghcr-pull}]
       containers: [{name: backend, image: ghcr.io/kushaltalati/studytrack-backend:does-not-exist}]
