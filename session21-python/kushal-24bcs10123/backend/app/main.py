@@ -4,11 +4,10 @@ import time
 from fastapi import Depends, FastAPI, HTTPException, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 from prometheus_client import Counter
-from prometheus_fastapi_instrumentator import Instrumentator
 from sqlalchemy import func, select, text
 from sqlalchemy.orm import Session
 
-from . import models, schemas
+from . import metrics, models, schemas
 from .config import settings
 from .db import get_db
 
@@ -29,12 +28,9 @@ if settings.cors_origins:
         allow_headers=["Content-Type"],
     )
 
-# Prometheus: default HTTP metrics (http_requests_total, http_request_duration_seconds, ...)
-# plus one business metric so the Grafana panel shows something that is really ours.
-Instrumentator(
-    should_group_status_codes=False,
-    excluded_handlers=["/metrics", "/health", "/ready"],
-).instrument(app).expose(app, endpoint="/metrics", include_in_schema=False)
+# Prometheus: request counter + latency histogram from app/metrics.py (exposed at /metrics)
+# plus two business counters so the Grafana panel shows something that is really ours.
+metrics.install(app)
 
 ENTRIES_CREATED = Counter(
     "studytrack_entries_created_total", "Study entries created through the API", ["subject"]
