@@ -76,7 +76,7 @@ kushal-24bcs10123/
 | M7 Terraform | [`terraform/`](terraform) incl. [`modules/eks`](terraform/modules/eks), [`terraform.tfvars.example`](terraform/terraform.tfvars.example); logs [20](docs/outputs/20-terraform-init-validate.txt)–[25](docs/outputs/25-terraform-destroy.txt) |
 | M8 Kubernetes + Helm | [`k8s/namespace.yaml`](k8s/namespace.yaml), [`helm/studytrack/`](helm/studytrack); logs [50](docs/outputs/50-helm-install.txt), [51](docs/outputs/51-k8s-verify.txt), [52](docs/outputs/52-hpa-load-test.txt); screenshot [10](screenshots/10-ingress-studytrack-local.png) |
 | M9 Observability | `/metrics` ([02](docs/outputs/02-api-smoke-test.txt)), ServiceMonitor, [`monitoring/`](monitoring); logs [60](docs/outputs/60-prometheus-targets-and-queries.txt), [61](docs/outputs/61-grafana-dashboard.txt) |
-| M10 Docs / demo | this README; GitOps demo in [53](docs/outputs/53-argocd-sync-and-selfheal.txt): push → pipeline → tag bump → Argo CD rollout |
+| M10 Docs / demo | this README; GitOps demo in [53](docs/outputs/53-argocd-sync-and-selfheal.txt): push → pipeline → tag bump → Argo CD rollout; slides in [`presentation/`](presentation) |
 
 ## M1 – Application
 
@@ -394,6 +394,10 @@ $ kubectl -n studytrack logs deploy/studytrack-backend | head -3
 $ curl -s -H 'Host: studytrack.local' http://localhost/api/entries/summary
 {"total_entries":5,"total_minutes":270,"done_minutes":195,...}   <- data survived the rollout (PVC)
 ```
+
+## Presentation (M10)
+
+[`presentation/StudyTrack_Final_Presentation_24BCS10123.pptx`](presentation/StudyTrack_Final_Presentation_24BCS10123.pptx) – 14 slides, one per module plus architecture, troubleshooting and the live-demo order, speaker notes inside. Same deck on Google Slides: https://docs.google.com/presentation/d/1aJ0D7gTPjV8jmI8KP8jrrsacV5dM_FHhz68Lay3FCeE/edit
 
 ## Troubleshooting exercises
 
